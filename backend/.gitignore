@@ -1,0 +1,13 @@
+node_modules/
+.env
+uploads/
+*.log
+.DS_Store
+coverage/
+.vscode/
+
+/generated/prisma
+
+# Firebase service account (NEVER commit this!)
+firebase-service-account.json
+config/firebase-service-account.json

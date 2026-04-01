@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CircSave – Methodology Slides</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f1117;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      padding: 40px 20px;
+    }
+    .slide {
+      width: 960px;
+      min-height: 540px;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 30px 80px rgba(0,0,0,.6);
+      display: flex;
+      flex-direction: column;
+      page-break-after: always;
+    }
+    /* ─ Slide 1 – Title ─ */
+    .slide-title {
+      background: linear-gradient(135deg, #0d1b2a 0%, #1a3a5c 60%, #0d6efd 100%);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 60px 80px;
+    }
+    .slide-title .kicker { font-size: 13px; font-weight: 600; letter-spacing: 3px; color: #64b5f6; text-transform: uppercase; margin-bottom: 18px; }
+    .slide-title h1 { font-size: 52px; font-weight: 800; line-height: 1.1; background: linear-gradient(90deg, #fff 40%, #64b5f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .slide-title .subtitle { margin-top: 20px; font-size: 18px; color: #90caf9; font-weight: 300; }
+    .slide-title .badge-row { margin-top: 30px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .badge { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 6px 18px; font-size: 13px; font-weight: 600; color: #e3f2fd; }
+    /* ─ Slide header ─ */
+    .slide-header { background: linear-gradient(90deg, #0d6efd, #0056c7); padding: 22px 40px; display: flex; align-items: center; gap: 14px; }
+    .slide-header .icon { font-size: 28px; }
+    .slide-header h2 { font-size: 22px; font-weight: 700; letter-spacing: .5px; }
+    .slide-header .slide-num { margin-left: auto; font-size: 13px; opacity: .6; font-weight: 600; }
+    .slide-body { flex: 1; padding: 34px 40px; }
+    /* ─ Slide 2 – Problem ─ */
+    .slide-problem { background: #111827; }
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 100%; }
+    .prob-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 26px; }
+    .prob-card .label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+    .prob-card.red .label { color: #f87171; }
+    .prob-card.green .label { color: #4ade80; }
+    .bullet-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+    .bullet-list li { font-size: 14px; color: #d1d5db; display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+    .bullet-list li .dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+    .dot-red { background: #f87171; }
+    .dot-green { background: #4ade80; }
+    .dot-blue { background: #60a5fa; }
+    .dot-yellow { background: #fbbf24; }
+    /* ─ Slide 3 – Phases ─ */
+    .slide-phases { background: #0f1a2b; }
+    .phases-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+    .phase-card { border-radius: 14px; padding: 24px; border: 1px solid rgba(255,255,255,.1); position: relative; overflow: hidden; }
+    .phase-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .phase-card.p1::before { background: #3b82f6; }
+    .phase-card.p2::before { background: #8b5cf6; }
+    .phase-card.p3::before { background: #10b981; }
+    .phase-card.p1 { background: rgba(59,130,246,.08); }
+    .phase-card.p2 { background: rgba(139,92,246,.08); }
+    .phase-card.p3 { background: rgba(16,185,129,.08); }
+    .phase-num { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .phase-card.p1 .phase-num { color: #60a5fa; }
+    .phase-card.p2 .phase-num { color: #a78bfa; }
+    .phase-card.p3 .phase-num { color: #34d399; }
+    .phase-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+    /* ─ Slide 4 – Tech Stack ─ */
+    .slide-tech { background: #111827; }
+    .tech-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .tech-group h4 { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #60a5fa; border-bottom: 1px solid rgba(96,165,250,.3); padding-bottom: 8px; margin-bottom: 14px; }
+    .tech-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; margin-bottom: 8px; }
+    .tech-row:nth-child(odd) { background: rgba(255,255,255,.04); }
+    .tech-row .tech-name { font-size: 14px; font-weight: 600; min-width: 190px; color: #e2e8f0; }
+    .tech-row .tech-purpose { font-size: 13px; color: #94a3b8; }
+    /* ─ Slide 5 – Architecture ─ */
+    .slide-arch { background: #0d1117; }
+    .arch-diagram { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 28px; }
+    .arch-box { border-radius: 12px; padding: 18px 24px; text-align: center; font-size: 14px; font-weight: 700; border: 2px solid; min-width: 160px; }
+    .arch-box.react { background: rgba(97,218,251,.1); border-color: #61dafb; color: #61dafb; }
+    .arch-box.express { background: rgba(13,202,240,.1); border-color: #0dcaf0; color: #0dcaf0; }
+    .arch-box.firestore { background: rgba(255,160,0,.1); border-color: #ffa000; color: #ffa000; }
+    .arch-box.cron { background: rgba(251,191,36,.1); border-color: #fbbf24; color: #fbbf24; }
+    .arch-arrow { font-size: 22px; color: #475569; padding: 0 10px; }
+    .arch-sub { font-size: 12px; color: #64748b; font-weight: 400; margin-top: 4px; }
+    .arch-bottom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .arch-feature { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 14px 18px; font-size: 13px; color: #94a3b8; }
+    .arch-feature strong { color: #e2e8f0; display: block; margin-bottom: 4px; font-size: 14px; }
+    /* ─ Slide 6 – Auto Workflow ─ */
+    .slide-auto { background: #0a1628; }
+    .auto-flow { display: flex; flex-direction: column; gap: 14px; }
+    .flow-step { display: flex; align-items: center; gap: 18px; }
+    .flow-step .step-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .flow-step.s1 .step-icon { background: rgba(59,130,246,.2); }
+    .flow-step.s2 .step-icon { background: rgba(251,191,36,.2); }
+    .flow-step.s3 .step-icon { background: rgba(139,92,246,.2); }
+    .flow-step.s4 .step-icon { background: rgba(16,185,129,.2); }
+    .flow-step.s5 .step-icon { background: rgba(239,68,68,.2); }
+    .flow-content h4 { font-size: 15px; font-weight: 700; color: #f1f5f9; }
+    .flow-content p { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+    /* ─ Slide 7 – Summary ─ */
+    .slide-summary { background: linear-gradient(135deg, #0d1b2a 0%, #0d6efd33 100%); }
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .summary-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 20px 22px; display: flex; gap: 14px; align-items: flex-start; }
+    .summary-card .emoji { font-size: 28px; flex-shrink: 0; }
+    .summary-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+    .summary-card p { font-size: 13px; color: #94a3b8; line-height: 1.6; }
+    @media print { body { background: white; gap: 0; padding: 0; } .slide { border-radius: 0; box-shadow: none; width: 100%; page-break-after: always; } }
+  </style>
+</head>
+<body>
+
+  <!-- ════ SLIDE 1 – TITLE ════ -->
+  <div class="slide slide-title">
+    <div class="kicker">Final Year Project · Methodology</div>
+    <h1>CircSave</h1>
+    <div class="subtitle">Digitising Traditional Cooperative Savings Circles (ROSCA)<br/>via Automated Web-Based Financial Platform</div>
+    <div class="badge-row">
+      <span class="badge">React.js</span>
+      <span class="badge">Node.js</span>
+      <span class="badge">Firebase Firestore</span>
+      <span class="badge">Firebase Auth</span>
+      <span class="badge">REST API</span>
+      <span class="badge">Automated Scheduling</span>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 2 – PROBLEM & AIM ════ -->
+  <div class="slide slide-problem">
+    <div class="slide-header">
+      <span class="icon">🎯</span>
+      <h2>Problem Statement & Project Aim</h2>
+      <span class="slide-num">SLIDE 2</span>
+    </div>
+    <div class="slide-body">
+      <div class="problem-grid">
+        <div class="prob-card red">
+          <div class="label">❌ The Problem</div>
+          <ul class="bullet-list">
+            <li><span class="dot dot-red"></span>Manual record-keeping is error-prone and opaque</li>
+            <li><span class="dot dot-red"></span>No real-time visibility for group members</li>
+            <li><span class="dot dot-red"></span>Missed contributions go undetected without enforcement</li>
+            <li><span class="dot dot-red"></span>Payout order disputes due to lack of clear rules</li>
+            <li><span class="dot dot-red"></span>No digital audit trail or transaction history</li>
+          </ul>
+        </div>
+        <div class="prob-card green">
+          <div class="label">✅ The Solution</div>
+          <ul class="bullet-list">
+            <li><span class="dot dot-green"></span>Fully digital savings circle platform</li>
+            <li><span class="dot dot-green"></span>Automated wallet deductions — no manual chasing</li>
+            <li><span class="dot dot-green"></span>Grace period & penalty enforcement built in</li>
+            <li><span class="dot dot-green"></span>Transparent payout rotation with pre-set order</li>
+            <li><span class="dot dot-green"></span>Full ledger of every transaction in real-time</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 3 – METHODOLOGY PHASES ════ -->
+  <div class="slide slide-phases">
+    <div class="slide-header">
+      <span class="icon">🔬</span>
+      <h2>Development Methodology — Three Phases</h2>
+      <span class="slide-num">SLIDE 3</span>
+    </div>
+    <div class="slide-body">
+      <div class="phases-row">
+        <div class="phase-card p1">
+          <div class="phase-num">Phase 1</div>
+          <h3>System Design & Architecture</h3>
+          <ul class="bullet-list">
+            <li><span class="dot dot-blue"></span>Designed REST API client-server architecture</li>
+            <li><span class="dot dot-blue"></span>Modelled financial domain entities (ERD)</li>
+            <li><span class="dot dot-blue"></span>Adopted MVC + Service Layer pattern</li>
+            <li><span class="dot dot-blue"></span>Firebase Auth + Firestore as core infrastructure</li>
+          </ul>
+        </div>
+        <div class="phase-card p2">
+          <div class="phase-num">Phase 2</div>
+          <h3>Core Feature Implementation</h3>
+          <ul class="bullet-list">
+            <li><span class="dot dot-yellow"></span>Firestore-backed wallet ledger & transaction log</li>
+            <li><span class="dot dot-yellow"></span>Group creation, invite codes & membership</li>
+            <li><span class="dot dot-yellow"></span>Contribution tracking & cycle management</li>
+            <li><span class="dot dot-yellow"></span>React frontend with live dashboards</li>
+          </ul>
+        </div>
+        <div class="phase-card p3">
+          <div class="phase-num">Phase 3</div>
+          <h3>Automation & Enforcement</h3>
+          <ul class="bullet-list">
+            <li><span class="dot dot-green"></span>Cron-based auto-debit scheduler</li>
+            <li><span class="dot dot-green"></span>Grace period + missed payment penalties</li>
+            <li><span class="dot dot-green"></span>Automated payout rotation engine</li>
+            <li><span class="dot dot-green"></span>Commission deduction before distribution</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 4 – TECHNOLOGY STACK ════ -->
+  <div class="slide slide-tech">
+    <div class="slide-header">
+      <span class="icon">🛠️</span>
+      <h2>Technology Stack</h2>
+      <span class="slide-num">SLIDE 4</span>
+    </div>
+    <div class="slide-body">
+      <div class="tech-cols">
+        <div class="tech-group">
+          <h4>Frontend (Client-Side)</h4>
+          <div class="tech-row"><span class="tech-name">React.js 18 + Vite</span><span class="tech-purpose">SPA framework & build tool</span></div>
+          <div class="tech-row"><span class="tech-name">TailwindCSS</span><span class="tech-purpose">Utility-first responsive styling</span></div>
+          <div class="tech-row"><span class="tech-name">React Router DOM</span><span class="tech-purpose">Client-side page navigation</span></div>
+          <div class="tech-row"><span class="tech-name">React Context API</span><span class="tech-purpose">Global auth state management</span></div>
+          <div class="tech-row"><span class="tech-name">Recharts</span><span class="tech-purpose">Savings data visualisation</span></div>
+          <div class="tech-row"><span class="tech-name">Axios / Fetch API</span><span class="tech-purpose">Backend HTTP communication</span></div>
+        </div>
+        <div class="tech-group">
+          <h4>Backend & Infrastructure</h4>
+          <div class="tech-row"><span class="tech-name">Node.js + Express.js</span><span class="tech-purpose">REST API server (MVC + Service Layer)</span></div>
+          <div class="tech-row"><span class="tech-name">Firebase Firestore</span><span class="tech-purpose">NoSQL cloud document database</span></div>
+          <div class="tech-row"><span class="tech-name">Firebase Authentication</span><span class="tech-purpose">Identity management & ID tokens</span></div>
+          <div class="tech-row"><span class="tech-name">Firebase Admin SDK</span><span class="tech-purpose">Server-side Firebase access</span></div>
+          <div class="tech-row"><span class="tech-name">node-cron</span><span class="tech-purpose">Automated debit & payout jobs</span></div>
+          <div class="tech-row"><span class="tech-name">Nodemailer</span><span class="tech-purpose">Email notifications & reminders</span></div>
+          <div class="tech-row"><span class="tech-name">Custom Currency Utils</span><span class="tech-purpose">Kobo/Naira precise arithmetic</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 5 – SYSTEM ARCHITECTURE ════ -->
+  <div class="slide slide-arch">
+    <div class="slide-header">
+      <span class="icon">🏛️</span>
+      <h2>System Architecture Overview</h2>
+      <span class="slide-num">SLIDE 5</span>
+    </div>
+    <div class="slide-body">
+      <div class="arch-diagram">
+        <div class="arch-box react">React SPA<div class="arch-sub">Port 5173</div></div>
+        <div class="arch-arrow">⟷</div>
+        <div class="arch-box express">Express API<div class="arch-sub">REST / Port 5000</div></div>
+        <div class="arch-arrow">⟷</div>
+        <div class="arch-box firestore">Firestore<div class="arch-sub">Firebase Admin SDK</div></div>
+        <div class="arch-arrow" style="padding-left:30px">↑</div>
+        <div class="arch-box cron">node-cron<div class="arch-sub">Scheduled Jobs</div></div>
+      </div>
+      <div class="arch-bottom">
+        <div class="arch-feature">
+          <strong>Firebase Auth</strong>
+          ID token verification middleware, user registration & secure login
+        </div>
+        <div class="arch-feature">
+          <strong>Wallet Ledger</strong>
+          Firestore atomic transactions for deposits, debits & escrow
+        </div>
+        <div class="arch-feature">
+          <strong>Group Engine</strong>
+          Cycle tracking, member rotation, invite code system
+        </div>
+        <div class="arch-feature">
+          <strong>Contribution Scheduler</strong>
+          Auto-debit wallets on due dates via cron
+        </div>
+        <div class="arch-feature">
+          <strong>Payout Scheduler</strong>
+          Distribute lump sum to next recipient after cycle close
+        </div>
+        <div class="arch-feature">
+          <strong>Enforcement Layer</strong>
+          Grace periods, penalty application, overdue cycle delay
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 6 – AUTOMATED WORKFLOW ════ -->
+  <div class="slide slide-auto">
+    <div class="slide-header">
+      <span class="icon">⚙️</span>
+      <h2>Core Automated Workflow</h2>
+      <span class="slide-num">SLIDE 6</span>
+    </div>
+    <div class="slide-body">
+      <div class="auto-flow">
+        <div class="flow-step s1">
+          <div class="step-icon">🕐</div>
+          <div class="flow-content">
+            <h4>1. Cron Job Fires (Hourly / Daily)</h4>
+            <p><code>cronJobs.js</code> triggers both the Contribution Scheduler and Payout Scheduler at set intervals</p>
+          </div>
+        </div>
+        <div class="flow-step s2">
+          <div class="step-icon">💳</div>
+          <div class="flow-content">
+            <h4>2. Auto-Debit Members' Wallets</h4>
+            <p><code>contributionScheduler.js</code> queries Firestore for due schedules and debits each member's wallet via a Firestore atomic transaction</p>
+          </div>
+        </div>
+        <div class="flow-step s3">
+          <div class="step-icon">⏳</div>
+          <div class="flow-content">
+            <h4>3. Grace Period & Penalty Enforcement</h4>
+            <p>Insufficient balance triggers a grace deadline written to Firestore. After expiry, the contribution is marked OVERDUE and the group cycle is marked DELAYED</p>
+          </div>
+        </div>
+        <div class="flow-step s4">
+          <div class="step-icon">🏦</div>
+          <div class="flow-content">
+            <h4>4. Funds Pool in Group Escrow</h4>
+            <p>Collected funds are transferred to the group's <code>currentEscrowBalance</code> in Firestore, verified before payout is released</p>
+          </div>
+        </div>
+        <div class="flow-step s5">
+          <div class="step-icon">🚀</div>
+          <div class="flow-content">
+            <h4>5. Auto-Payout to Next Recipient</h4>
+            <p><code>payoutScheduler.js</code> verifies all contributions, deducts platform commission, and auto-credits the lump sum to the recipient's Firestore wallet</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 7 – KEY CONTRIBUTIONS ════ -->
+  <div class="slide slide-summary">
+    <div class="slide-header">
+      <span class="icon">✅</span>
+      <h2>Key Contributions & Project Value</h2>
+      <span class="slide-num">SLIDE 7</span>
+    </div>
+    <div class="slide-body">
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="emoji">🔄</div>
+          <div>
+            <h4>Full ROSCA Digitisation</h4>
+            <p>Entire traditional savings circle lifecycle managed digitally — from group creation to final payout — with zero manual intervention.</p>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="emoji">🤖</div>
+          <div>
+            <h4>Scheduled Automation</h4>
+            <p>Automated contribution collection and payout distribution via cron jobs eliminates the need for an admin to manually collect or transfer funds.</p>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="emoji">🔥</div>
+          <div>
+            <h4>Firebase-Native Infrastructure</h4>
+            <p>Firebase Firestore provides real-time, scalable, atomic transactions. Firebase Authentication handles secure identity — no custom auth server required.</p>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="emoji">📊</div>
+          <div>
+            <h4>Financial Inclusion Focus</h4>
+            <p>Targets underserved communities relying on informal savings, providing a formal, verifiable, and trustworthy digital alternative.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

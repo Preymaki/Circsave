@@ -1,0 +1,281 @@
+// Prisma Schema for CircSave
+// PostgreSQL Database Configuration
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MODEL
+// ============================================
+model User {
+  id           String   @id @default(uuid())
+  fullName     String   @db.VarChar(100)
+  email        String   @unique @db.VarChar(255)
+  password     String   @db.VarChar(255)
+  phoneNumber  String?  @db.VarChar(20)
+  profileImage String?  @db.VarChar(500)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  wallet              Wallet?
+  adminGroups         Group[]               @relation("GroupAdmin")
+  groupMemberships    GroupMember[]
+  contributions       Contribution[]
+  transactions        Transaction[]
+  payouts             Payout[]
+  aiInsights          AIInsight[]
+
+  @@index([email])
+  @@map("users")
+}
+
+// ============================================
+// WALLET MODEL
+// ============================================
+model Wallet {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  availableBalance Decimal  @default(0) @db.Decimal(10, 2)
+  lockedBalance    Decimal  @default(0) @db.Decimal(10, 2)
+  totalFunded      Decimal  @default(0) @db.Decimal(10, 2)
+  totalSpent       Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relationships
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId])
+  @@map("wallets")
+}
+
+// ============================================
+// GROUP MODEL
+// ============================================
+model Group {
+  id                       String   @id @default(uuid())
+  name                     String   @db.VarChar(100)
+  description              String?  @db.VarChar(500)
+  adminId                  String
+  joinCode                 String   @unique @db.VarChar(6)
+  contributionAmount       Decimal  @db.Decimal(10, 2)
+  contributionFrequency    String   @db.VarChar(20) // 'daily', 'weekly', 'monthly'
+  contributionPeriodMonths Int      @default(6)
+  totalCycles              Int
+  currentCycle             Int      @default(1)
+  maxMembers               Int      @default(6)
+  
+  // Financial tracking
+  totalPerCycle         Decimal  @default(0) @db.Decimal(10, 2)
+  totalPayout           Decimal  @default(0) @db.Decimal(10, 2)
+  currentEscrowBalance  Decimal  @default(0) @db.Decimal(10, 2)
+  totalContributed      Decimal  @default(0) @db.Decimal(10, 2)
+  
+  // Settings
+  savingsMode        String  @default("group") @db.VarChar(20) // 'group' or 'individual'
+  isInviteEnabled    Boolean @default(true)
+  latePaymentPenalty Decimal @default(0) @db.Decimal(10, 2)
+  
+  // Status & Dates
+  status    String    @default("active") @db.VarChar(20) // 'active' or 'closed'
+  startDate DateTime
+  endDate   DateTime?
+  closedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relationships
+  admin                 User                    @relation("GroupAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+  members               GroupMember[]
+  contributions         Contribution[]
+  payouts               Payout[]
+  contributionSchedules ContributionSchedule[]
+
+  @@index([adminId])
+  @@index([status])
+  @@index([joinCode])
+  @@map("groups")
+}
+
+// ============================================
+// GROUP MEMBER (Join Table with Metadata)
+// ============================================
+model GroupMember {
+  id                String   @id @default(uuid())
+  groupId           String
+  userId            String
+  joinedAt          DateTime @default(now())
+  payoutTurn        Int
+  hasReceivedPayout Boolean  @default(false)
+
+  // Relationships
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Ensure unique membership
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+  @@index([payoutTurn])
+  @@map("group_members")
+}
+
+// ============================================
+// CONTRIBUTION MODEL
+// ============================================
+model Contribution {
+  id                   String   @id @default(uuid())
+  groupId              String
+  userId               String
+  cycleNumber          Int
+  amount               Decimal  @db.Decimal(10, 2)
+  
+  // Legacy field (optional for historical data)
+  receiptUrl           String?  @db.VarChar(500)
+  
+  // Wallet-based fields
+  walletTransactionId  String?
+  dueDate              DateTime
+  paidAt               DateTime?
+  
+  // Auto-debit tracking
+  isAutoDebited        Boolean  @default(false)
+  autoDebitedAt        DateTime?
+  
+  // Status
+  status               String   @default("scheduled") @db.VarChar(20) // 'scheduled', 'paid', 'missed', 'locked', 'released'
+  isLate               Boolean  @default(false)
+  penaltyAmount        Decimal  @default(0) @db.Decimal(10, 2)
+  notes                String?  @db.VarChar(500)
+  
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // Relationships
+  group              Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletTransaction  Transaction? @relation(fields: [walletTransactionId], references: [id])
+
+  @@index([groupId, userId, cycleNumber])
+  @@index([status])
+  @@index([dueDate])
+  @@map("contributions")
+}
+
+// ============================================
+// TRANSACTION MODEL
+// ============================================
+model Transaction {
+  id             String   @id @default(uuid())
+  walletId       String
+  userId         String
+  type           String   @db.VarChar(30) // 'fund', 'lock', 'unlock', 'escrow_deposit', 'payout', 'refund'
+  amount         Decimal  @db.Decimal(10, 2)
+  balanceBefore  Decimal  @db.Decimal(10, 2)
+  balanceAfter   Decimal  @db.Decimal(10, 2)
+  reference      String?  @db.VarChar(100)
+  description    String   @db.VarChar(500)
+  status         String   @default("completed") @db.VarChar(20) // 'pending', 'completed', 'failed'
+  
+  // Metadata for linking
+  groupId        String?
+  contributionId String?
+  payoutId       String?
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relationships
+  wallet        Wallet         @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions Contribution[]
+
+  @@index([walletId, createdAt])
+  @@index([userId, createdAt])
+  @@index([type])
+  @@index([reference])
+  @@map("transactions")
+}
+
+// ============================================
+// PAYOUT MODEL
+// ============================================
+model Payout {
+  id              String   @id @default(uuid())
+  groupId         String
+  userId          String
+  cycleNumber     Int
+  amount          Decimal  @db.Decimal(10, 2)
+  status          String   @default("pending") @db.VarChar(20) // 'pending', 'completed', 'failed'
+  transactionId   String?  @db.VarChar(255)
+  paidAt          DateTime?
+  isAutomated     Boolean  @default(false)
+  automatedAt     DateTime?
+  notes           String?  @db.VarChar(500)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relationships
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, cycleNumber])
+  @@index([userId])
+  @@index([status])
+  @@map("payouts")
+}
+
+// ============================================
+// AI INSIGHT MODEL
+// ============================================
+model AIInsight {
+  id         String   @id @default(uuid())
+  userId     String
+  type       String   @db.VarChar(50) // 'financial_health', 'savings_recommendation', etc.
+  title      String   @db.VarChar(200)
+  content    String   @db.Text
+  priority   String   @default("medium") @db.VarChar(20) // 'low', 'medium', 'high'
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([isRead])
+  @@map("ai_insights")
+}
+
+// ============================================
+// CONTRIBUTION SCHEDULE MODEL
+// ============================================
+model ContributionSchedule {
+  id                String   @id @default(uuid())
+  groupId           String
+  userId            String   @db.VarChar(255) // Store as string for flexibility
+  cycleNumber       Int
+  dueDate           DateTime
+  amount            Decimal  @db.Decimal(10, 2)
+  status            String   @default("pending") @db.VarChar(20) // 'pending', 'processed', 'failed'
+  processedAt       DateTime?
+  contributionId    String?  @db.VarChar(255)
+  failureReason     String?  @db.VarChar(500)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, cycleNumber])
+  @@index([dueDate, status])
+  @@map("contribution_schedules")
+}

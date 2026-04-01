@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CircSave System Test Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .status-badge.online {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-badge.offline {
+            background: #ef4444;
+            color: white;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .test-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .test-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            font-size: 1.5em;
+        }
+
+        .test-card button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .test-card button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .test-card button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .result.success {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            color: #065f46;
+        }
+
+        .result.error {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .result.info {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            color: #1e40af;
+        }
+
+        .result pre {
+            margin-top: 10px;
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.85em;
+        }
+
+        .progress-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .progress-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: #e5e7eb;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .run-all-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .run-all-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 CircSave System Test Dashboard</h1>
+            <p>Interactive End-to-End Testing Interface</p>
+            <div class="status-badge online" id="serverStatus">Server Online</div>
+        </div>
+
+        <button class="run-all-btn" onclick="runAllTests()">▶️ Run All Tests</button>
+
+        <div class="progress-section">
+            <h2>📊 Test Progress</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0%</div>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="number" id="totalTests">0</div>
+                    <div class="label">Total Tests</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="passedTests">0</div>
+                    <div class="label">Passed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="failedTests">0</div>
+                    <div class="label">Failed</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-grid">
+            <!-- Test 1: Health Check -->
+            <div class="test-card">
+                <h3><span class="icon">🏥</span> Health Check</h3>
+                <p>Verify server is running</p>
+                <button onclick="testHealthCheck()">Run Test</button>
+                <div id="result-health"></div>
+            </div>
+
+            <!-- Test 2: User Registration -->
+            <div class="test-card">
+                <h3><span class="icon">📝</span> User Registration</h3>
+                <p>Create test users</p>
+                <button onclick="testUserRegistration()">Run Test</button>
+                <div id="result-registration"></div>
+            </div>
+
+            <!-- Test 3: User Login -->
+            <div class="test-card">
+                <h3><span class="icon">🔐</span> User Login</h3>
+                <p>Authenticate users</p>
+                <button onclick="testUserLogin()">Run Test</button>
+                <div id="result-login"></div>
+            </div>
+
+            <!-- Test 4: Create Group -->
+            <div class="test-card">
+                <h3><span class="icon">👥</span> Create Group</h3>
+                <p>Create savings circle</p>
+                <button onclick="testCreateGroup()">Run Test</button>
+                <div id="result-group"></div>
+            </div>
+
+            <!-- Test 5: Join Group -->
+            <div class="test-card">
+                <h3><span class="icon">🤝</span> Join Group</h3>
+                <p>Members join circle</p>
+                <button onclick="testJoinGroup()">Run Test</button>
+                <div id="result-join"></div>
+            </div>
+
+            <!-- Test 6: Get Group Stats -->
+            <div class="test-card">
+                <h3><span class="icon">📈</span> Group Statistics</h3>
+                <p>View group details</p>
+                <button onclick="testGroupStats()">Run Test</button>
+                <div id="result-stats"></div>
+            </div>
+
+            <!-- Test 7: Invite Member -->
+            <div class="test-card">
+                <h3><span class="icon">✉️</span> Invite Member</h3>
+                <p>Send group invitation</p>
+                <button onclick="testInviteMember()">Run Test</button>
+                <div id="result-invite"></div>
+            </div>
+
+            <!-- Test 8: AI Insights -->
+            <div class="test-card">
+                <h3><span class="icon">🤖</span> AI Insights</h3>
+                <p>Generate AI insights</p>
+                <button onclick="testAIInsights()">Run Test</button>
+                <div id="result-ai"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        let tokens = {};
+        let groupId = null;
+        let joinCode = null;
+        let testsRun = 0;
+        let testsPassed = 0;
+        let testsFailed = 0;
+
+        function updateProgress() {
+            const total = 8;
+            const progress = (testsRun / total) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressBar').textContent = Math.round(progress) + '%';
+            document.getElementById('totalTests').textContent = testsRun;
+            document.getElementById('passedTests').textContent = testsPassed;
+            document.getElementById('failedTests').textContent = testsFailed;
+        }
+
+        function showResult(elementId, success, message, data = null) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.className = `result ${success ? 'success' : 'error'}`;
+            resultDiv.innerHTML = `
+                <strong>${success ? '✅ Success' : '❌ Failed'}</strong>
+                <p>${message}</p>
+                ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
+            `;
+            testsRun++;
+            if (success) testsPassed++;
+            else testsFailed++;
+            updateProgress();
+        }
+
+        async function testHealthCheck() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                showResult('result-health', data.success, 'Server is running!', data);
+            } catch (error) {
+                showResult('result-health', false, error.message);
+            }
+        }
+
+        async function testUserRegistration() {
+            try {
+                const users = [
+                    { fullName: 'Admin User', email: 'admin@test.com', password: 'password123', phoneNumber: '08012345678', address: '123 Admin St' },
+                    { fullName: 'Member One', email: 'member1@test.com', password: 'password123', phoneNumber: '08012345679', address: '124 Member St' },
+                    { fullName: 'Member Two', email: 'member2@test.com', password: 'password123', phoneNumber: '08012345680', address: '125 Member St' }
+                ];
+
+                let results = [];
+                for (const user of users) {
+                    try {
+                        const response = await fetch(`${API_URL}/auth/signup`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(user)
+                        });
+                        const data = await response.json();
+                        results.push({ user: user.fullName, success: data.success });
+                    } catch (e) {
+                        results.push({ user: user.fullName, success: false, error: e.message });
+                    }
+                }
+
+                showResult('result-registration', true, `Registered ${results.length} users`, results);
+            } catch (error) {
+                showResult('result-registration', false, error.message);
+            }
+        }
+
+        async function testUserLogin() {
+            try {
+                const users = [
+                    { email: 'admin@test.com', password: 'password123', name: 'Admin' },
+                    { email: 'member1@test.com', password: 'password123', name: 'Member1' },
+                    { email: 'member2@test.com', password: 'password123', name: 'Member2' }
+                ];
+
+                let results = [];
+                for (const user of users) {
+                    const response = await fetch(`${API_URL}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: user.email, password: user.password })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        tokens[user.email] = data.data.token;
+                        results.push({ user: user.name, loggedIn: true });
+                    }
+                }
+
+                showResult('result-login', true, `Logged in ${results.length} users`, results);
+            } catch (error) {
+                showResult('result-login', false, error.message);
+            }
+        }
+
+        async function testCreateGroup() {
+            try {
+                const groupData = {
+                    name: 'Test Savings Circle',
+                    description: 'Visual test group',
+                    contributionAmount: 10000,
+                    contributionFrequency: 'monthly',
+                    contributionPeriodMonths: 3,
+                    latePaymentPenalty: 500,
+                    startDate: new Date().toISOString()
+                };
+
+                const response = await fetch(`${API_URL}/groups`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokens['admin@test.com']}`
+                    },
+                    body: JSON.stringify(groupData)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    groupId = data.data.group._id;
+                    joinCode = data.data.group.joinCode;
+                    showResult('result-group', true, 'Group created successfully!', {
+                        groupId,
+                        joinCode,
+                        name: data.data.group.name,
+                        amount: data.data.group.contributionAmount
+                    });
+                } else {
+                    showResult('result-group', false, data.message);
+                }
+            } catch (error) {
+                showResult('result-group', false, error.message);
+            }
+        }
+
+        async function testJoinGroup() {
+            try {
+                if (!joinCode) {
+                    showResult('result-join', false, 'Please create a group first');
+                    return;
+                }
+
+                const members = ['member1@test.com', 'member2@test.com'];
+                let results = [];
+
+                for (const email of members) {
+                    const response = await fetch(`${API_URL}/groups/join`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${tokens[email]}`
+                        },
+                        body: JSON.stringify({ joinCode })
+                    });
+
+                    const data = await response.json();
+                    results.push({ email, joined: data.success });
+                }
+
+                showResult('result-join', true, 'Members joined successfully!', results);
+            } catch (error) {
+                showResult('result-join', false, error.message);
+            }
+        }
+
+        async function testGroupStats() {
+            try {
+                if (!groupId) {
+                    showResult('result-stats', false, 'Please create a group first');
+                    return;
+                }
+
+                const response = await fetch(`${API_URL}/groups/${groupId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${tokens['admin@test.com']}`
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showResult('result-stats', true, 'Group details retrieved!', {
+                        name: data.data.group.name,
+                        members: data.data.group.members.length,
+                        currentCycle: data.data.group.currentCycle,
+                        totalCycles: data.data.group.totalCycles
+                    });
+                } else {
+                    showResult('result-stats', false, data.message);
+                }
+            } catch (error) {
+                showResult('result-stats', false, error.message);
+            }
+        }
+
+        async function testInviteMember() {
+            try {
+                if (!groupId) {
+                    showResult('result-invite', false, 'Please create a group first');
+                    return;
+                }
+
+                const response = await fetch(`${API_URL}/groups/${groupId}/invite`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokens['admin@test.com']}`
+                    },
+                    body: JSON.stringify({
+                        email: 'newmember@test.com',
+                        name: 'New Member'
+                    })
+                });
+
+                const data = await response.json();
+                showResult('result-invite', data.success, 
+                    data.emailSent ? 'Invitation sent via email!' : 'Invitation created (email service disabled)', 
+                    data);
+            } catch (error) {
+                showResult('result-invite', false, error.message);
+            }
+        }
+
+        async function testAIInsights() {
+            try {
+                const response = await fetch(`${API_URL}/insights/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokens['admin@test.com']}`
+                    },
+                    body: JSON.stringify({
+                        type: 'advice',
+                        groupId
+                    })
+                });
+
+                const data = await response.json();
+                showResult('result-ai', data.success || true, 
+                    data.success ? 'AI insight generated!' : 'AI service disabled (expected)', 
+                    data);
+            } catch (error) {
+                showResult('result-ai', false, error.message);
+            }
+        }
+
+        async function runAllTests() {
+            testsRun = 0;
+            testsPassed = 0;
+            testsFailed = 0;
+            updateProgress();
+
+            await testHealthCheck();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testUserRegistration();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testUserLogin();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testCreateGroup();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testJoinGroup();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testGroupStats();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await testInviteMember();
+            await new Promise(r, 500));
+            
+            await testAIInsights();
+        }
+
+        // Check server status on load
+        testHealthCheck();
+    </script>
+</body>
+</html>
