@@ -262,10 +262,11 @@ export const autoProcessPayout = async (payout) => {
             return m;
         });
 
-        // Roll cycle forward (new cycle_start = old cycle_end, new cycle_end = +cycleLength days)
+        // Roll cycle forward — ANCHORED TO ACTUAL PAYOUT EXECUTION DATE (not original schedule)
+        // This is the critical fix for grace-delayed payout cycle drift.
         let cycleRollUpdate = {};
         try {
-            cycleRollUpdate = rollForwardCycle(group);
+            cycleRollUpdate = rollForwardCycle(group, now);
         } catch (rollErr) {
             // If group doesn't have cycle_end_date yet (legacy), skip the roll
             console.warn(`⚠️  Could not roll cycle forward for group ${payout.groupId}: ${rollErr.message}`);
@@ -274,6 +275,8 @@ export const autoProcessPayout = async (payout) => {
         await db.collection(COLLECTIONS.GROUPS).doc(payout.groupId).update(
             prepareForFirestore({
                 members: updatedMembers,
+                // Always reset cycleStatus to 'active' so future payouts are not blocked
+                cycleStatus: 'active',
                 ...(cycleRollUpdate.cycle_start_date ? {
                     cycle_start_date: cycleRollUpdate.cycle_start_date,
                     cycle_end_date:   cycleRollUpdate.cycle_end_date,
@@ -285,7 +288,7 @@ export const autoProcessPayout = async (payout) => {
 
         console.log(`✓ Paid ${formatKoboAsNaira(payout.amount)} to ${payout.recipientId} from group ${group.name}`);
         if (cycleRollUpdate.cycle_start_date) {
-            console.log(`↺ Cycle rolled forward: new start=${cycleRollUpdate.cycle_start_date}, end=${cycleRollUpdate.cycle_end_date}`);
+            console.log(`↺ Cycle rolled forward (anchored to actual payout): new start=${cycleRollUpdate.cycle_start_date}, end=${cycleRollUpdate.cycle_end_date}`);
         }
         return { success: true };
     } catch (error) {
@@ -314,10 +317,83 @@ export const getUserUpcomingPayouts = async (userId, limit = 10) => {
     }
 };
 
+/**
+ * Re-check all payouts blocked by incomplete contributions.
+ * Called by cron after grace retry runs, so unblocked payouts are immediately
+ * re-queued for the next processScheduledPayouts() run.
+ *
+ * A blocked payout is re-activated (status → 'scheduled') only when:
+ *   1. group.cycleStatus is NOT 'delayed'
+ *   2. ALL contribution_schedules for this cycle are paid / completed
+ */
+export const processBlockedPayouts = async () => {
+    try {
+        const snapshot = await db.collection(COLLECTIONS.PAYOUTS)
+            .where('status', '==', 'blocked_incomplete_contributions')
+            .get();
+
+        if (snapshot.empty) {
+            console.log('✅ [Blocked Payouts] No blocked payouts to re-check.');
+            return { reactivated: 0, stillBlocked: 0 };
+        }
+
+        console.log(`🔄 [Blocked Payouts] Re-checking ${snapshot.docs.length} blocked payout(s)...`);
+
+        let reactivated = 0, stillBlocked = 0;
+
+        for (const doc of snapshot.docs) {
+            const payout = { id: doc.id, ref: doc.ref, ...doc.data() };
+
+            try {
+                // Re-load group to get latest cycleStatus
+                const groupDoc = await db.collection(COLLECTIONS.GROUPS).doc(payout.groupId).get();
+                if (!groupDoc.exists) { stillBlocked++; continue; }
+                const group = { id: groupDoc.id, ...groupDoc.data() };
+
+                // Still delayed at group level
+                if (group.cycleStatus === 'delayed') {
+                    console.log(`⏳ [Blocked Payouts] Payout ${payout.id} still delayed (group.cycleStatus=delayed)`);
+                    stillBlocked++;
+                    continue;
+                }
+
+                // Check contribution completeness
+                const { allPaid, blockedUsers } = await verifyAllMembersPaid(payout.groupId, payout.cycleNumber);
+                if (!allPaid) {
+                    console.log(`⏳ [Blocked Payouts] Payout ${payout.id} still has ${blockedUsers.length} member(s) unpaid`);
+                    stillBlocked++;
+                    continue;
+                }
+
+                // All clear — reset to 'scheduled' so the next payout cron picks it up
+                await payout.ref.update(prepareForFirestore({
+                    status: 'scheduled',
+                    blockReason: null,
+                    blockedUsers: null,
+                    updatedAt: serverTimestamp()
+                }));
+
+                console.log(`✅ [Blocked Payouts] Payout ${payout.id} re-activated → scheduled`);
+                reactivated++;
+            } catch (err) {
+                console.error(`[Blocked Payouts] Error processing payout ${payout.id}:`, err.message);
+                stillBlocked++;
+            }
+        }
+
+        console.log(`🔄 [Blocked Payouts] Done: ${reactivated} re-activated, ${stillBlocked} still blocked`);
+        return { reactivated, stillBlocked };
+    } catch (error) {
+        console.error('Error in processBlockedPayouts:', error);
+        throw error;
+    }
+};
+
 export default {
     scheduleGroupPayouts,
     processScheduledPayouts,
     autoProcessPayout,
     verifyAllMembersPaid,
+    processBlockedPayouts,
     getUserUpcomingPayouts
 };

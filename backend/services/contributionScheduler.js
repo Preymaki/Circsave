@@ -414,6 +414,38 @@ export const retryGraceContributions = async () => {
 
                     console.log(`✓ [Grace Retry] Paid ${formatKoboAsNaira(schedule.amount)} for user ${schedule.userId}`);
                     succeeded++;
+
+                    // ——— Cycle-Status Reset Check ———
+                    // After this member pays, re-read all schedules for this cycle.
+                    // If every member has now paid, reset cycleStatus → 'active'.
+                    // This unblocks the payout gate so processBlockedPayouts() can
+                    // re-activate the payout record on the next cron run.
+                    try {
+                        const allSchedulesSnap = await db.collection(COLLECTIONS.CONTRIBUTION_SCHEDULES)
+                            .where('groupId', '==', schedule.groupId)
+                            .where('cycleNumber', '==', schedule.cycleNumber)
+                            .get();
+
+                        const allSchedules = allSchedulesSnap.docs.map(d => d.data());
+                        const anyStillBlocking = allSchedules.some(
+                            s => s.status === 'failed' || s.status === 'overdue'
+                        );
+
+                        if (!anyStillBlocking && allSchedules.length > 0) {
+                            await db.collection(COLLECTIONS.GROUPS)
+                                .doc(schedule.groupId)
+                                .update(prepareForFirestore({
+                                    cycleStatus: 'active',
+                                    updatedAt: serverTimestamp()
+                                }));
+                            console.log(`✅ [Grace Retry] All members paid for cycle ${schedule.cycleNumber} in group ${schedule.groupId} — cycleStatus reset to 'active'`);
+                        }
+                    } catch (statusErr) {
+                        // Non-fatal: log and continue. processBlockedPayouts() will re-check.
+                        console.warn(`⚠️  [Grace Retry] Could not check cycleStatus reset for group ${schedule.groupId}:`, statusErr.message);
+                    }
+                    // ——— End Cycle-Status Reset Check ———
+
                 } else {
                     console.log(`✗ [Grace Retry] Still insufficient for user ${schedule.userId} (${formatKoboAsNaira(result.available)} / ${formatKoboAsNaira(result.required)})`);
                     stillFailed++;

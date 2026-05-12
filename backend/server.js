@@ -72,10 +72,11 @@ app.get('/api/health', (req, res) => {
         message: 'CircSave API is running',
         timestamp: new Date().toISOString(),
         cronJobs: {
-            contributionAutoDebit: 'Running every hour (0 * * * *)',
-            automatedPayouts: 'Running every 6 hours (0 */6 * * *)',
-            graceRetry: 'Running daily at 08:00 (0 8 * * *)',
-            graceExpiry: 'Running daily at 09:00 (0 9 * * *)'
+            contributionAutoDebit:  'Running every hour (0 * * * *)',
+            automatedPayouts:       'Running every 6 hours (0 */6 * * *)',
+            graceRetry:             'Running daily at 08:00 (0 8 * * *)',
+            graceExpiry:            'Running daily at 09:00 (0 9 * * *)',
+            blockedPayoutRecheck:   'Running every hour at :30 (30 * * * *)'
         }
     });
 });
@@ -170,6 +171,28 @@ app.post('/api/admin/trigger-grace-expiry', protect, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to trigger grace expiry',
+            error: error.message
+        });
+    }
+});
+
+// Manually trigger blocked-payout re-check (protected: admin only)
+app.post('/api/admin/trigger-blocked-payouts', protect, async (req, res) => {
+    try {
+        const { processBlockedPayouts } = await import('./services/payoutScheduler.js');
+        const result = await processBlockedPayouts();
+
+        res.json({
+            success: true,
+            message: 'Blocked payout re-check manually triggered',
+            result,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error triggering blocked payout check:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to trigger blocked payout re-check',
             error: error.message
         });
     }

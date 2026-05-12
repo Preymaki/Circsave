@@ -5,7 +5,10 @@ import {
     expireGraceContributions,
     processDailyDeductions
 } from '../services/contributionScheduler.js';
-import { processScheduledPayouts } from '../services/payoutScheduler.js';
+import {
+    processScheduledPayouts,
+    processBlockedPayouts
+} from '../services/payoutScheduler.js';
 
 /**
  * Cron Jobs Configuration
@@ -68,12 +71,27 @@ cron.schedule('*/5 * * * *', async () => {
     }
 });
 
+// ── Re-check Blocked Payouts ────────────────────────────────────────────────
+// Runs every hour. Finds payouts that were blocked due to incomplete contributions
+// and re-activates them ('scheduled') if all members have now paid.
+// Ensures that grace-delayed payouts are executed within 1 hour of resolution.
+cron.schedule('30 * * * *', async () => {
+    console.log('🔄 [CRON] Re-checking blocked payouts...');
+    try {
+        const result = await processBlockedPayouts();
+        console.log(`🔄 [CRON] Blocked payouts: ${result.reactivated} re-activated, ${result.stillBlocked} still blocked`);
+    } catch (error) {
+        console.error('❌ [CRON] Blocked payout re-check failed:', error);
+    }
+});
+
 console.log('✅ Cron jobs initialized successfully');
 console.log('   - Contribution auto-debit:     Every hour    (monthly/weekly on deduction day)');
 console.log('   - Automated payouts:           Every 6 hours (on cycle end date)');
 console.log('   - Grace period retry:          Daily at 08:00 UTC');
 console.log('   - Grace period expiry check:   Daily at 09:00 UTC');
 console.log('   - Daily savings deductions:    Every 5 mins  (fires at user-chosen UTC time)');
+console.log('   - Blocked payout re-check:     Every hour at :30 (re-queues unblocked payouts)');
 
 export default {
     // Export functions for manual triggers (e.g. in tests or admin endpoints)
@@ -81,5 +99,6 @@ export default {
     triggerPayoutProcessing: processScheduledPayouts,
     triggerGraceRetry: retryGraceContributions,
     triggerGraceExpiry: expireGraceContributions,
-    triggerDailyDeductions: processDailyDeductions
+    triggerDailyDeductions: processDailyDeductions,
+    triggerBlockedPayoutCheck: processBlockedPayouts
 };

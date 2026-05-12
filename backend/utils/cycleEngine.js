@@ -8,6 +8,11 @@
  *  - weekly   → 7-day fixed intervals
  *  - daily    → single-user, deduction at user-chosen UTC time every 24 h
  *
+ * Cycle Anchor Rule:
+ *  Cycle timing is anchored to PAYOUT EXECUTION DATE — not the original
+ *  scheduled date. If a grace period delays payout, the next cycle starts
+ *  from the actual payout timestamp, preventing time drift.
+ *
  * All functions operate in UTC. No Firestore dependency.
  */
 
@@ -153,23 +158,38 @@ export function isPayoutDay(group, nowUTC = new Date()) {
 
 /**
  * Roll the cycle forward after a successful payout.
- * new cycle_start_date = previous cycle_end_date
- * new cycle_end_date   = new cycle_start_date + cycleLength days
  *
- * @param {object} group  Requires cycle_end_date, contributionFrequency
+ * ⚠️  CYCLE ANCHOR RULE:
+ *   new cycle_start_date = actualPayoutDate (when payout actually executed)
+ *
+ * If `actualPayoutDate` is omitted (legacy call), falls back to cycle_end_date.
+ * Always pass `actualPayoutDate` when calling from autoProcessPayout so that
+ * grace-delayed payouts anchor the next cycle to the real execution time,
+ * not the original scheduled end date.
+ *
+ * @param {object}      group            Requires cycle_end_date, contributionFrequency
+ * @param {Date|string|null} actualPayoutDate  The real UTC timestamp when payout executed
  * @returns {{ cycle_start_date: string, cycle_end_date: string, deduction_date: string }}
  */
-export function rollForwardCycle(group) {
+export function rollForwardCycle(group, actualPayoutDate = null) {
     const freq = group.contributionFrequency || group.frequency;
-    const prevEnd = toFirestoreDate(group.cycle_end_date);
-    if (!prevEnd) throw new Error('group.cycle_end_date is required to roll forward cycle');
 
-    const newStart = toUTCMidnight(prevEnd);
-    const newEnd   = calcCycleEndDate(newStart, freq);
-    const newDeduction = calcDeductionDate(newStart, freq);
+    // Prefer the actual payout execution timestamp as the cycle anchor.
+    // Fall back to the scheduled cycle_end_date for legacy compatibility.
+    let anchorDate;
+    if (actualPayoutDate) {
+        anchorDate = toUTCMidnight(actualPayoutDate);
+    } else {
+        const prevEnd = toFirestoreDate(group.cycle_end_date);
+        if (!prevEnd) throw new Error('group.cycle_end_date is required to roll forward cycle');
+        anchorDate = toUTCMidnight(prevEnd);
+    }
+
+    const newEnd       = calcCycleEndDate(anchorDate, freq);
+    const newDeduction = calcDeductionDate(anchorDate, freq);
 
     return {
-        cycle_start_date: newStart.toISOString(),
+        cycle_start_date: anchorDate.toISOString(),
         cycle_end_date:   newEnd.toISOString(),
         deduction_date:   newDeduction.toISOString()
     };

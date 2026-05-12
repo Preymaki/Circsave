@@ -1,25 +1,31 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Plus, Users, TrendingUp, Clock, ArrowRight, Wallet, AlertOctagon } from 'lucide-react';
+import { Plus, Users, TrendingUp, Clock, ArrowRight, Wallet, AlertOctagon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { formatNaira } from '../utils/currency';
+import Navbar from '../components/Navbar';
 
 export default function Dashboard() {
     const { user, logout } = useAuth();
     const [groups, setGroups] = useState({ activeGroups: [], closedGroups: [] });
     const [loading, setLoading] = useState(true);
     const [wallet, setWallet] = useState(null);
+    const [totalSaved, setTotalSaved] = useState(0);
+    const [nextContribution, setNextContribution] = useState(null);
 
     useEffect(() => {
         fetchGroups();
         fetchWallet();
+        fetchTotalSaved();
     }, []);
 
     const fetchGroups = async () => {
         try {
             const response = await api.get('/groups');
-            setGroups(response.data.data);
+            if (response.data?.success && response.data?.data) {
+                setGroups(response.data.data);
+            }
         } catch (error) {
             console.error('Failed to fetch groups:', error);
         } finally {
@@ -38,41 +44,77 @@ export default function Dashboard() {
         }
     };
 
-    const calculateTotalSaved = () => {
-        return 0;
+    const fetchTotalSaved = async () => {
+        try {
+            const response = await api.get('/contributions/my');
+            if (response.data?.success && response.data?.data?.contributions) {
+                const paid = response.data.data.contributions
+                    .filter(c => c.status === 'paid')
+                    .reduce((sum, c) => sum + (c.amount || 0), 0);
+                setTotalSaved(paid);
+            }
+        } catch (error) {
+            console.error('Failed to fetch contributions:', error);
+        }
     };
 
-    const getNextContribution = () => {
+    // Derive next contribution date from the active groups already loaded
+    const computeNextContribution = (activeGroups) => {
+        if (!activeGroups || activeGroups.length === 0) return null;
+
+        const dates = activeGroups
+            .map(group => {
+                // Prefer the fixed-cycle engine's cycle_end_date if present
+                if (group.cycle_end_date) {
+                    return new Date(group.cycle_end_date);
+                }
+                // Fallback: calculate from startDate + currentCycle + frequency
+                if (group.startDate) {
+                    const start = group.startDate?.toDate
+                        ? group.startDate.toDate()
+                        : new Date(group.startDate);
+                    const cycle = group.currentCycle || 1;
+                    const freq = group.contributionFrequency;
+                    const due = new Date(start);
+                    if (freq === 'weekly') due.setDate(due.getDate() + (cycle - 1) * 7);
+                    else if (freq === 'monthly') due.setMonth(due.getMonth() + (cycle - 1));
+                    else if (freq === 'daily') due.setDate(due.getDate() + (cycle - 1));
+                    return due;
+                }
+                return null;
+            })
+            .filter(Boolean)
+            .sort((a, b) => a - b);
+
+        return dates.length > 0 ? dates[0] : null;
+    };
+
+    // Recompute next contribution whenever groups change
+    useEffect(() => {
+        const date = computeNextContribution(groups.activeGroups);
+        setNextContribution(date);
+    }, [groups]);
+
+    const formatNextContribution = () => {
         if (groups.activeGroups.length === 0) return 'No upcoming';
-        return 'Coming soon';
+        if (!nextContribution) return 'Calculating…';
+        const now = new Date();
+        const diffMs = nextContribution - now;
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) return 'Overdue';
+        if (diffDays === 0) return 'Due today';
+        if (diffDays === 1) return 'Tomorrow';
+        if (diffDays <= 6) return `In ${diffDays} days`;
+
+        return nextContribution.toLocaleDateString('en-NG', {
+            day: 'numeric', month: 'short', year: 'numeric'
+        });
     };
 
     return (
         <div className="min-h-screen">
-            <nav className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-                                <TrendingUp className="w-6 h-6 text-white" />
-                            </div>
-                            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
-                                CircSave
-                            </h1>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <Link to="/history" className="text-sm text-slate-600 hover:text-slate-800 font-medium">
-                                History
-                            </Link>
-                            <span className="text-sm text-slate-600">Welcome, <span className="font-semibold">{user?.fullName}</span></span>
-                            <button onClick={logout} className="flex items-center gap-2 px-4 py-2 text-slate-700 hover:text-red-600 transition-colors">
-                                <LogOut className="w-4 h-4" />
-                                Logout
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -106,7 +148,7 @@ export default function Dashboard() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-600 mb-1">Total Saved</p>
-                                <p className="text-3xl font-bold text-slate-800">{formatNaira(calculateTotalSaved())}</p>
+                                <p className="text-3xl font-bold text-slate-800">{formatNaira(totalSaved)}</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                                 <TrendingUp className="w-6 h-6 text-green-600" />
@@ -130,7 +172,7 @@ export default function Dashboard() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-600 mb-1">Next Contribution</p>
-                                <p className="text-lg font-semibold text-slate-800">{getNextContribution()}</p>
+                                <p className="text-lg font-semibold text-slate-800">{formatNextContribution()}</p>
                             </div>
                             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                                 <Clock className="w-6 h-6 text-purple-600" />

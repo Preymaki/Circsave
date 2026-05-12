@@ -155,7 +155,7 @@ export default function VerifyReceipts() {
                                     {/* Receipt Image */}
                                     <div className="bg-slate-100 rounded-lg p-4">
                                         <img
-                                            src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${selectedContribution.receiptUrl}`}
+                                            src={`${(import.meta.env.VITE_API_URL || 'http://localhost:5000').replace('/api', '')}${selectedContribution.receiptUrl}`}
                                             alt="Payment receipt"
                                             className="w-full rounded-lg"
                                         />
