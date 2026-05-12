@@ -45,8 +45,7 @@ CircSave addresses the inefficiencies of manual record-keeping in traditional co
 
 Before running this project, ensure you have:
 - Node.js (v18 or higher)
-- MongoDB (local or Atlas)
-- Gmail account (for email notifications)
+
 
 ## 🔧 Installation & Setup
 
@@ -67,12 +66,7 @@ Create a `.env` file in the `backend` directory:
 PORT=5000
 NODE_ENV=development
 
-# Database
-MONGODB_URI=mongodb://localhost:27017/circsave
 
-# JWT Configuration
-JWT_SECRET=your_secure_jwt_secret_key_here
-JWT_EXPIRE=7d
 
 # Email Service (Gmail)
 EMAIL_SERVICE=gmail
@@ -102,15 +96,7 @@ Create a `.env` file in the `frontend` directory:
 VITE_API_URL=http://localhost:5000/api
 ```
 
-### 4. Start MongoDB
 
-Make sure MongoDB is running on your system:
-```bash
-# Windows (if MongoDB is installed as a service)
-net start MongoDB
-
-# Or start manually
-mongod
 ```
 
 ### 5. Run the Application
