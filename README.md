@@ -35,7 +35,6 @@ CircSave addresses the inefficiencies of manual record-keeping in traditional co
 
 ### Backend
 - Node.js with Express.js
-- MongoDB with Mongoose
 - JWT for authentication
 - Multer for file uploads
 - Nodemailer for email notifications
