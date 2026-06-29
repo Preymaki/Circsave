@@ -1,4 +1,3 @@
-# Railway.json — tells Railway how to build and start the backend
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
