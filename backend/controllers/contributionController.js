@@ -37,9 +37,12 @@ export const submitContribution = async (req, res) => {
 
         const alreadyContributed = existingQuery.docs.some(doc => {
             const data = doc.data();
+            // Only treat it as a duplicate if it's a successful/active record.
+            // 'missed', 'failed', and 'scheduled' (stale from a previous failed attempt)
+            // are all excluded so the user can always retry.
             return (
                 data.cycleNumber === Number(cycleNumber) &&
-                !['missed', 'failed'].includes(data.status)
+                !['missed', 'failed', 'scheduled'].includes(data.status)
             );
         });
 
@@ -64,9 +67,22 @@ export const submitContribution = async (req, res) => {
         const penaltyAmountKobo = late ? (group.latePaymentPenalty || 0) : 0;
         const totalAmount = amountKobo + penaltyAmountKobo;
 
-        // WALLET-ONLY SYSTEM: Attempt immediate payment from wallet
+        // WALLET-ONLY SYSTEM: Attempt immediate payment from wallet.
+        // IMPORTANT: We debit the wallet FIRST and only then create the contribution
+        // record with its final status ('paid' or 'missed').
+        // The old approach of pre-creating a 'scheduled' record caused stale records
+        // that permanently blocked retries when a payment failed.
         try {
-            // Create contribution record first
+            // Attempt wallet debit first
+            const walletResult = await walletService.debitForContribution(
+                req.user.id,
+                groupId,
+                totalAmount,
+                'pending',
+                { cycleNumber, groupName: group.name }
+            );
+
+            // Payment successful - create contribution as 'paid'
             const contributionData = prepareForFirestore({
                 groupId,
                 userId: req.user.id,
@@ -76,32 +92,15 @@ export const submitContribution = async (req, res) => {
                 dueDate: dueDate.toISOString(),
                 isLate: late,
                 notes: notes || null,
-                status: 'scheduled',
-                paidAt: null,
-                walletTransactionId: null,
+                status: 'paid',
+                paidAt: serverTimestamp(),
+                walletTransactionId: walletResult.transactionId || null,
                 isAutoDebited: false,
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp()
             });
 
             const contributionRef = await db.collection(COLLECTIONS.CONTRIBUTIONS).add(contributionData);
-
-            // Attempt wallet debit
-            const walletResult = await walletService.debitForContribution(
-                req.user.id,
-                groupId,
-                totalAmount,
-                contributionRef.id,
-                { cycleNumber, groupName: group.name }
-            );
-
-            // Payment successful - update contribution
-            await contributionRef.update(prepareForFirestore({
-                status: 'paid',
-                paidAt: serverTimestamp(),
-                walletTransactionId: walletResult.transaction?.id || null,
-                updatedAt: serverTimestamp()
-            }));
 
             // ── Mark the matching schedule entry as completed so the auto-debit
             //    cron does NOT attempt to charge this member again for this cycle ──
@@ -134,7 +133,8 @@ export const submitContribution = async (req, res) => {
             });
 
         } catch (walletError) {
-            // Insufficient funds or wallet error - create missed contribution
+            // Insufficient funds or wallet error - create a missed contribution record.
+            // No stale 'scheduled' record is left behind because we never pre-created one.
             const contributionData = prepareForFirestore({
                 groupId,
                 userId: req.user.id,

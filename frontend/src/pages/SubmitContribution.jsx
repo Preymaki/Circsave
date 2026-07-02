@@ -67,12 +67,11 @@ export default function SubmitContribution() {
 
         // WALLET-ONLY SYSTEM: Check balance before submitting
         // Amount is Naira (user-typed); wallet balance is kobo.
-        // Also add the late-payment penalty (already in kobo) if the group has one.
+        // Only check against the base contribution amount — the backend determines
+        // lateness and applies any penalty at debit time.
         const contributionAmountKobo = nairaToKobo(parseFloat(formData.amount));
-        const penaltyKobo = group?.latePaymentPenalty || 0;
-        const totalRequiredKobo = contributionAmountKobo + penaltyKobo;
-        if (walletBalance && walletBalance.availableBalance < totalRequiredKobo) {
-            setError(`Insufficient wallet balance. You need ${formatNaira(totalRequiredKobo)} but only have ${formatNaira(walletBalance.availableBalance)}`);
+        if (walletBalance && walletBalance.availableBalance < contributionAmountKobo) {
+            setError(`Insufficient wallet balance. You need ${formatNaira(contributionAmountKobo)} but only have ${formatNaira(walletBalance.availableBalance)}`);
             setLoading(false);
             return;
         }
@@ -109,10 +108,8 @@ export default function SubmitContribution() {
         );
     }
 
-    // insufficientBalance check: compare total required (contribution + penalty) vs available kobo balance
-    const penaltyKobo = group?.latePaymentPenalty || 0;
-    const totalRequiredKobo = nairaToKobo(parseFloat(formData.amount)) + penaltyKobo;
-    const insufficientBalance = walletBalance && totalRequiredKobo > walletBalance.availableBalance;
+    // insufficientBalance check: compare user-typed Naira vs available kobo balance
+    const insufficientBalance = walletBalance && nairaToKobo(parseFloat(formData.amount)) > walletBalance.availableBalance;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4 py-8">

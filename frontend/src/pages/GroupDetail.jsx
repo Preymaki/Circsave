@@ -586,11 +586,11 @@ export default function GroupDetail() {
 
                                 <div className="grid md:grid-cols-2 gap-6">
                                     {/* Wallet Balance */}
-                                    <div className={`p-4 rounded-lg border-l-4 ${wallet?.availableBalance >= (group.contributionAmount + (group.latePaymentPenalty || 0)) ? 'bg-emerald-50 border-emerald-500' : 'bg-amber-50 border-amber-500'}`}>
+                                    <div className={`p-4 rounded-lg border-l-4 ${wallet?.availableBalance >= group.contributionAmount ? 'bg-emerald-50 border-emerald-500' : 'bg-amber-50 border-amber-500'}`}>
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <p className="text-sm font-medium text-slate-600 mb-1">Your Wallet Balance</p>
-                                                <p className={`text-2xl font-bold ${wallet?.availableBalance >= (group.contributionAmount + (group.latePaymentPenalty || 0)) ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                                <p className={`text-2xl font-bold ${wallet?.availableBalance >= group.contributionAmount ? 'text-emerald-700' : 'text-amber-700'}`}>
                                                     {wallet ? formatNaira(wallet.availableBalance) : '₦0.00'}
                                                 </p>
                                             </div>
@@ -599,10 +599,10 @@ export default function GroupDetail() {
                                             </Link>
                                         </div>
 
-                                        {wallet?.availableBalance < (group.contributionAmount + (group.latePaymentPenalty || 0)) && (
+                                        {wallet?.availableBalance < group.contributionAmount && (
                                             <div className="mt-2 text-xs text-amber-800 flex items-center gap-1">
                                                 <AlertTriangle className="w-3 h-3" />
-                                                Top up {formatNaira((group.contributionAmount + (group.latePaymentPenalty || 0)) - (wallet?.availableBalance || 0))} for next payment
+                                                Top up {formatNaira(group.contributionAmount - (wallet?.availableBalance || 0))} for next payment
                                             </div>
                                         )}
 
@@ -620,12 +620,6 @@ export default function GroupDetail() {
                                                 c.cycleNumber === currentCycle && c.status === 'paid'
                                             );
 
-                                            // Total required = contribution + late penalty (if any).
-                                            // latePaymentPenalty is stored in kobo.
-                                            const penaltyKobo = group.latePaymentPenalty || 0;
-                                            const totalRequiredKobo = group.contributionAmount + penaltyKobo;
-                                            const hasSufficientBalance = wallet?.availableBalance >= totalRequiredKobo;
-
                                             if (hasPaid) {
                                                 return (
                                                     <div className="bg-emerald-100 text-emerald-800 p-3 rounded-lg flex items-center gap-3">
@@ -638,31 +632,18 @@ export default function GroupDetail() {
                                                 );
                                             } else {
                                                 return (
-                                                    <>
-                                                        {penaltyKobo > 0 && (
-                                                            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 flex items-center gap-1">
-                                                                <AlertTriangle className="w-3 h-3 flex-shrink-0" />
-                                                                Late penalty applies: {formatNaira(penaltyKobo)} extra required
-                                                            </div>
+                                                    <button
+                                                        onClick={handlePayNow}
+                                                        disabled={wallet?.availableBalance < group.contributionAmount || paying}
+                                                        className="btn-primary w-full py-3 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {paying ? (
+                                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                        ) : (
+                                                            <DollarSign className="w-4 h-4" />
                                                         )}
-                                                        <button
-                                                            onClick={handlePayNow}
-                                                            disabled={!hasSufficientBalance || paying}
-                                                            className="btn-primary w-full py-3 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        >
-                                                            {paying ? (
-                                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                                            ) : (
-                                                                <DollarSign className="w-4 h-4" />
-                                                            )}
-                                                            Pay {formatNaira(totalRequiredKobo)} Now
-                                                        </button>
-                                                        {!hasSufficientBalance && (
-                                                            <p className="text-xs text-red-600 text-center">
-                                                                Need {formatNaira(totalRequiredKobo - (wallet?.availableBalance || 0))} more in wallet
-                                                            </p>
-                                                        )}
-                                                    </>
+                                                        Pay {formatNaira(group.contributionAmount)} Now
+                                                    </button>
                                                 );
                                             }
                                         })()}
