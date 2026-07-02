@@ -27,17 +27,21 @@ export const submitContribution = async (req, res) => {
             return res.status(403).json({ success: false, message: 'You are not a member of this group' });
         }
 
-        // Check if contribution already exists for this cycle
-        // Using 2-field query (groupId + userId) then filtering cycleNumber in-memory
-        // to avoid requiring a Firestore composite index
+        // Check if a SUCCESSFUL (paid/scheduled) contribution already exists for this cycle.
+        // We intentionally exclude 'missed' and 'failed' records so the user can retry
+        // after a failed payment attempt.
         const existingQuery = await db.collection(COLLECTIONS.CONTRIBUTIONS)
             .where('groupId', '==', groupId)
             .where('userId', '==', req.user.id)
             .get();
 
-        const alreadyContributed = existingQuery.docs.some(
-            doc => doc.data().cycleNumber === Number(cycleNumber)
-        );
+        const alreadyContributed = existingQuery.docs.some(doc => {
+            const data = doc.data();
+            return (
+                data.cycleNumber === Number(cycleNumber) &&
+                !['missed', 'failed'].includes(data.status)
+            );
+        });
 
         if (alreadyContributed) {
             return res.status(400).json({
