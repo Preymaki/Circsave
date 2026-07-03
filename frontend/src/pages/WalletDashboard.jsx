@@ -173,6 +173,8 @@ export default function WalletDashboard() {
         switch (type) {
             case 'fund':
                 return <ArrowDownLeft className="w-4 h-4" />;
+            case 'withdrawal':
+                return <ArrowUpRight className="w-4 h-4" />;
             case 'lock':
             case 'escrow_deposit':
                 return <ArrowUpRight className="w-4 h-4" />;
@@ -189,6 +191,7 @@ export default function WalletDashboard() {
     const getTransactionTypeColor = (type) => {
         const colors = {
             fund: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+            withdrawal: 'text-red-700 bg-red-50 border-red-200',
             lock: 'text-orange-700 bg-orange-50 border-orange-200',
             unlock: 'text-blue-700 bg-blue-50 border-blue-200',
             escrow_deposit: 'text-purple-700 bg-purple-50 border-purple-200',
@@ -202,6 +205,7 @@ export default function WalletDashboard() {
     const getTransactionTypeLabel = (type) => {
         const labels = {
             fund: 'Added Funds',
+            withdrawal: 'Withdrawal',
             lock: 'Locked',
             unlock: 'Unlocked',
             escrow_deposit: 'To Escrow',
@@ -334,10 +338,19 @@ export default function WalletDashboard() {
 
                     {/* Quick Actions */}
                     <div className="card">
-                        <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                             <Plus className="w-5 h-5 text-primary-600" />
                             Quick Actions
                         </h3>
+
+                        {/* Withdraw Button */}
+                        <Link
+                            to="/withdraw"
+                            className="flex items-center justify-center gap-2 w-full px-4 py-3 mb-5 bg-gradient-to-r from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 border-2 border-red-200 hover:border-red-400 rounded-xl font-semibold text-red-700 hover:text-red-800 transition-all shadow-sm"
+                        >
+                            <ArrowUpRight className="w-5 h-5" />
+                            Withdraw Funds
+                        </Link>
 
                         {/* Quick Amount Buttons */}
                         <div className="mb-6">
@@ -463,11 +476,14 @@ export default function WalletDashboard() {
 
                                     {/* Amount */}
                                     <div className="text-right">
-                                        <p className={`text-lg font-bold ${txn.type === 'fund' || txn.type === 'payout' || txn.type === 'unlock'
-                                            ? 'text-green-600'
-                                            : txn.type === 'platform_fee'
-                                                ? 'text-slate-400'
-                                                : 'text-slate-700'
+                                        <p className={`text-lg font-bold ${
+                                            txn.type === 'fund' || txn.type === 'payout' || txn.type === 'unlock'
+                                                ? 'text-green-600'
+                                                : txn.type === 'withdrawal'
+                                                    ? 'text-red-600'
+                                                    : txn.type === 'platform_fee'
+                                                        ? 'text-slate-400'
+                                                        : 'text-slate-700'
                                             }`}>
                                             {txn.type === 'fund' || txn.type === 'payout' || txn.type === 'unlock' ? '+' : '-'}
                                             {formatNaira(txn.amount)}

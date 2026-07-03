@@ -538,6 +538,85 @@ export const getTransactionHistory = async (userId, limit = 50, skip = 0) => {
 };
 
 /**
+ * Withdraw funds from a user's wallet (simulated — no real bank transfer)
+ * @param {string} userId      - User ID
+ * @param {number} amount      - Amount in KOBO to withdraw
+ * @param {string} bank        - Destination bank / fintech name
+ * @param {string} accountNumber - 10-digit destination account number
+ * @param {string} accountName - Destination account name
+ * @param {string} [narration] - Optional narration
+ * @returns {Object} { success, wallet, transactionId, message }
+ */
+export const withdrawWallet = async (userId, amount, bank, accountNumber, accountName, narration = '') => {
+    try {
+        if (amount <= 0) {
+            throw new Error('Amount must be greater than zero');
+        }
+
+        let transactionId;
+
+        await db.runTransaction(async (transaction) => {
+            const walletRef = db.collection(COLLECTIONS.WALLETS).doc(userId);
+            const walletDoc = await transaction.get(walletRef);
+
+            if (!walletDoc.exists) {
+                throw new Error('Wallet not found. Please fund your wallet first.');
+            }
+
+            const wallet = walletDoc.data();
+            const availableBalance = wallet.availableBalance || 0;
+
+            // Validate sufficient balance (all values in kobo)
+            if (availableBalance < amount) {
+                throw new Error(
+                    `Insufficient balance. Available: ${formatKoboAsNaira(availableBalance)}, Required: ${formatKoboAsNaira(amount)}`
+                );
+            }
+
+            const newAvailableBalance = availableBalance - amount;
+
+            // Debit the wallet
+            transaction.update(walletRef, {
+                availableBalance: newAvailableBalance,
+                totalSpent: (wallet.totalSpent || 0) + amount,
+                updatedAt: serverTimestamp()
+            });
+
+            // Log the withdrawal transaction
+            const transactionRef = db.collection(COLLECTIONS.TRANSACTIONS).doc();
+            transactionId = transactionRef.id;
+
+            transaction.set(transactionRef, prepareForFirestore({
+                walletId: userId,
+                userId,
+                type: 'withdrawal',
+                amount,
+                balanceBefore: availableBalance,
+                balanceAfter: newAvailableBalance,
+                bank,
+                accountNumber,
+                accountName,
+                narration: narration || '',
+                description: `Withdrawal to ${bank} — ${accountNumber} (${accountName})`,
+                status: 'successful',
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            }));
+        });
+
+        return {
+            success: true,
+            wallet: await getOrCreateWallet(userId),
+            transactionId,
+            message: `Withdrawal of ${formatKoboAsNaira(amount)} processed successfully`
+        };
+    } catch (error) {
+        console.error('Withdraw wallet error:', error);
+        throw error;
+    }
+};
+
+/**
  * WALLET-ONLY SYSTEM: Debit wallet immediately for contribution
  * This replaces the lock/approve flow with instant payment
  * @param {string} userId - User ID

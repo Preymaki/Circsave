@@ -11,6 +11,7 @@ import GroupHistory from './pages/GroupHistory';
 import SubmitContribution from './pages/SubmitContribution';
 import ContributionHistory from './pages/ContributionHistory';
 import WalletDashboard from './pages/WalletDashboard';
+import Withdrawal from './pages/Withdrawal';
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
@@ -55,6 +56,7 @@ function AppRoutes() {
                 <Route path="/group/:id" element={<ProtectedRoute><GroupDetail /></ProtectedRoute>} />
                 <Route path="/history" element={<ProtectedRoute><GroupHistory /></ProtectedRoute>} />
                 <Route path="/wallet" element={<ProtectedRoute><WalletDashboard /></ProtectedRoute>} />
+                <Route path="/withdraw" element={<ProtectedRoute><Withdrawal /></ProtectedRoute>} />
                 <Route path="/group/:groupId/contribute" element={<ProtectedRoute><SubmitContribution /></ProtectedRoute>} />
                 {/* WALLET-ONLY SYSTEM: Receipt verification route removed */}
                 <Route path="/group/:groupId/contributions" element={<ProtectedRoute><ContributionHistory /></ProtectedRoute>} />

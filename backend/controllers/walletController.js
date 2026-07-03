@@ -3,6 +3,78 @@ import { getPlatformConfig } from '../services/platformConfigService.js';
 import { convertNairaToKobo } from '../utils/currency.js';
 
 /**
+ * @desc    Withdraw funds from wallet (simulated)
+ * @route   POST /api/wallet/withdraw
+ * @access  Private
+ */
+export const withdrawWallet = async (req, res) => {
+    try {
+        const { amount, bank, accountNumber, accountName, narration } = req.body;
+
+        // --- Field validation ---
+        if (!amount || parseFloat(amount) <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide a valid amount greater than zero'
+            });
+        }
+
+        if (!bank || bank.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Please select a bank or fintech'
+            });
+        }
+
+        if (!accountNumber || !/^\d{10}$/.test(String(accountNumber).trim())) {
+            return res.status(400).json({
+                success: false,
+                message: 'Account number must be exactly 10 digits'
+            });
+        }
+
+        if (!accountName || accountName.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Please enter the account name'
+            });
+        }
+
+        // Convert Naira → Kobo (mirrors fundWallet)
+        const amountKobo = convertNairaToKobo(parseFloat(amount));
+
+        const result = await walletService.withdrawWallet(
+            req.user.id,
+            amountKobo,
+            bank.trim(),
+            String(accountNumber).trim(),
+            accountName.trim(),
+            narration ? narration.trim() : ''
+        );
+
+        res.status(200).json({
+            success: true,
+            message: result.message,
+            data: {
+                wallet: result.wallet,
+                transactionId: result.transactionId
+            }
+        });
+    } catch (error) {
+        console.error('Withdraw wallet error:', error);
+        // Insufficient balance is a 400, not a 500
+        const isClientError = error.message && error.message.toLowerCase().includes('insufficient');
+        res.status(isClientError ? 400 : 500).json({
+            success: false,
+            message: error.message || 'Error processing withdrawal',
+            error: error.message
+        });
+    }
+};
+
+
+
+/**
  * @desc    Get user's wallet balance
  * @route   GET /api/wallet
  * @access  Private
