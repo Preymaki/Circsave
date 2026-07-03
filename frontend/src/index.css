@@ -38,3 +38,26 @@
   }
 }
 
+/* ─── Global dark-mode text legibility fixes ──────────────────────────────────
+   .dark .text-slate-X has higher specificity than .text-slate-X so these win
+   automatically across every page — no per-file changes needed.
+   Exceptions (e.g. text inside coloured badges) keep their own color because
+   they use text-emerald-*, text-orange-* etc, not text-slate-*.
+──────────────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Neutral text — lighten for dark backgrounds */
+  .dark .text-slate-900 { color: rgb(248 250 252);  } /* → slate-50  */
+  .dark .text-slate-800 { color: rgb(241 245 249);  } /* → slate-100 */
+  .dark .text-slate-700 { color: rgb(226 232 240);  } /* → slate-200 */
+  .dark .text-slate-600 { color: rgb(203 213 225);  } /* → slate-300 */
+  .dark .text-slate-500 { color: rgb(148 163 184);  } /* → slate-400 (subtle but readable) */
+
+  /* Solid white/light backgrounds inside cards — replace with dark equivalents */
+  .dark .bg-white       { background-color: rgb(30 41 59);   } /* slate-800   */
+  .dark .bg-slate-50    { background-color: rgb(30 41 59);   } /* slate-800   */
+  .dark .bg-slate-100   { background-color: rgb(15 23 42);   } /* slate-900   */
+
+  /* Border colours — keep visible on dark surfaces */
+  .dark .border-slate-200 { border-color: rgb(51 65 85);  }  /* slate-700 */
+  .dark .border-slate-100 { border-color: rgb(51 65 85);  }  /* slate-700 */
+}
