@@ -346,7 +346,7 @@ export default function WalletDashboard() {
                         {/* Withdraw Button */}
                         <Link
                             to="/withdraw"
-                            className="flex items-center justify-center gap-2 w-full px-4 py-3 mb-5 bg-gradient-to-r from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 border-2 border-red-200 hover:border-red-400 rounded-xl font-semibold text-red-700 hover:text-red-800 transition-all shadow-sm"
+                            className="flex items-center justify-center gap-2 w-full px-4 py-3 mb-5 bg-gradient-to-r from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 dark:hover:from-red-900/50 dark:hover:to-orange-900/50 border-2 border-red-200 hover:border-red-400 dark:border-red-700 dark:hover:border-red-500 rounded-xl font-semibold text-red-700 dark:text-red-400 hover:text-red-800 transition-all shadow-sm"
                         >
                             <ArrowUpRight className="w-5 h-5" />
                             Withdraw Funds
@@ -361,7 +361,7 @@ export default function WalletDashboard() {
                                         key={amount}
                                         onClick={() => handleQuickFund(amount)}
                                         disabled={funding}
-                                        className="px-4 py-3 bg-gradient-to-br from-slate-50 to-slate-100 hover:from-primary-50 hover:to-primary-100 border-2 border-slate-200 hover:border-primary-300 rounded-xl font-semibold text-slate-800 hover:text-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-4 py-3 bg-gradient-to-br from-slate-50 to-slate-100 hover:from-primary-50 hover:to-primary-100 dark:from-slate-700 dark:to-slate-600 dark:hover:from-primary-900/40 dark:hover:to-primary-800/40 border-2 border-slate-200 hover:border-primary-300 dark:border-slate-600 dark:hover:border-primary-500 rounded-xl font-semibold text-slate-800 dark:text-slate-100 hover:text-primary-700 dark:hover:text-primary-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         ₦{amount.toLocaleString()}
                                     </button>
@@ -372,7 +372,7 @@ export default function WalletDashboard() {
                         {/* Custom Amount Form */}
                         <form onSubmit={handleFundWallet} className="space-y-4">
                             <div>
-                                <label htmlFor="fundAmount" className="block text-sm font-semibold text-slate-700 mb-2">
+                                <label htmlFor="fundAmount" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                                     Custom Amount
                                 </label>
                                 <div className="relative">
