@@ -284,7 +284,7 @@ export default function Withdrawal() {
                             <div className="border-t border-slate-100" />
                             <SummaryRow
                                 label="Withdrawal Fee"
-                                value={<span className="text-emerald-600 font-semibold">\u20a60.00</span>}
+                                value={<span className="text-emerald-600 font-semibold">₦0.00</span>}
                             />
                             <SummaryRow
                                 label="Total Deduction"
@@ -406,7 +406,7 @@ export default function Withdrawal() {
                     <div>
                         <label htmlFor="w-amount" className="label">Amount</label>
                         <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-lg select-none">\u20a6</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-lg select-none">₦</span>
                             <input
                                 id="w-amount"
                                 type="number"
