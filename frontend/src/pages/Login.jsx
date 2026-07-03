@@ -131,7 +131,7 @@ export default function Login() {
                         <p className="text-xs text-slate-600 mt-1"></p>
                     </div>
                     <div className="p-3 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
-                        <p className="text-2xl font-bold text-primary-600">📊</p>
+                        <p className="text-2xl font-bold text-primary-600"></p>
                         <p className="text-xs text-slate-600 mt-1"></p>
                     </div>
                 </div>
