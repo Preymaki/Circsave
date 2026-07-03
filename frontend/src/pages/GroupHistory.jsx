@@ -44,7 +44,7 @@ export default function GroupHistory() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4 py-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-950 p-4 py-8">
             <div className="max-w-5xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">

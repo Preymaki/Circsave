@@ -218,7 +218,7 @@ export default function WalletDashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-950 flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600 mx-auto mb-4"></div>
                     <p className="text-slate-600 font-medium">Loading your wallet...</p>
@@ -228,7 +228,7 @@ export default function WalletDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4 py-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-950 p-4 py-8">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
@@ -239,13 +239,13 @@ export default function WalletDashboard() {
 
                     <div className="flex items-start justify-between flex-wrap gap-4">
                         <div>
-                            <h1 className="text-5xl font-bold text-slate-900 mb-3 flex items-center gap-4">
+                            <h1 className="text-5xl font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-4">
                                 <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center shadow-lg">
                                     <WalletIcon className="w-8 h-8 text-white" />
                                 </div>
                                 My Wallet
                             </h1>
-                            <p className="text-slate-600 text-lg">Manage your simulated funds for contributions</p>
+                            <p className="text-slate-600 dark:text-slate-400 text-lg">Manage your simulated funds for contributions</p>
                         </div>
 
                         <div className="flex items-center gap-3">
@@ -338,7 +338,7 @@ export default function WalletDashboard() {
 
                     {/* Quick Actions */}
                     <div className="card">
-                        <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                             <Plus className="w-5 h-5 text-primary-600" />
                             Quick Actions
                         </h3>
@@ -354,7 +354,7 @@ export default function WalletDashboard() {
 
                         {/* Quick Amount Buttons */}
                         <div className="mb-6">
-                            <p className="text-sm font-semibold text-slate-700 mb-3">Quick Add</p>
+                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Quick Add</p>
                             <div className="grid grid-cols-2 gap-2">
                                 {quickAmounts.map((amount) => (
                                     <button
@@ -414,7 +414,7 @@ export default function WalletDashboard() {
                 {/* Transaction History */}
                 <div className="card shadow-xl">
                     <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                             <Clock className="w-6 h-6 text-primary-600" />
                             Transaction History
                         </h3>
@@ -442,7 +442,7 @@ export default function WalletDashboard() {
                             {transactions.map((txn) => (
                                 <div
                                     key={txn.id}
-                                    className="flex items-center gap-4 p-4 bg-gradient-to-r from-slate-50 to-white rounded-xl border-2 border-slate-100 hover:border-primary-200 hover:shadow-md transition-all"
+                                    className="flex items-center gap-4 p-4 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-700 rounded-xl border-2 border-slate-100 dark:border-slate-700 hover:border-primary-200 hover:shadow-md transition-all"
                                 >
                                     {/* Icon */}
                                     <div className={`flex items-center justify-center w-12 h-12 rounded-xl border-2 ${getTransactionTypeColor(txn.type)}`}>
@@ -452,7 +452,7 @@ export default function WalletDashboard() {
                                     {/* Details */}
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <p className="font-semibold text-slate-900">{txn.description}</p>
+                                            <p className="font-semibold text-slate-900 dark:text-white">{txn.description}</p>
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${getTransactionTypeColor(txn.type)}`}>
                                                 {getTransactionTypeLabel(txn.type)}
                                             </span>
@@ -495,7 +495,7 @@ export default function WalletDashboard() {
                                                 <p className="text-red-400">Fee ({txn.commissionRate}%): -{formatNaira(txn.commission)}</p>
                                             </div>
                                         )}
-                                        <p className="text-sm text-slate-500 mt-1">
+                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                                             Balance: {txn.balanceAfter != null ? formatNaira(txn.balanceAfter) : '—'}
                                         </p>
                                     </div>

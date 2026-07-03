@@ -56,7 +56,7 @@ export default function Signup() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 py-12">
+        <div className="min-h-screen flex items-center justify-center p-4 py-12 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-800 dark:to-slate-950">
             <div className="w-full max-w-2xl">
                 {/* Header */}
                 <div className="text-center mb-8">
@@ -66,16 +66,16 @@ export default function Signup() {
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent mb-2">
                         Join CircSave
                     </h1>
-                    <p className="text-slate-600">Create your account and start saving together</p>
+                    <p className="text-slate-600 dark:text-slate-400">Create your account and start saving together</p>
                 </div>
 
                 {/* Signup Form */}
                 <div className="card">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {error && (
-                            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-start gap-3">
+                            <div className="bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-700 rounded-lg p-4 flex items-start gap-3">
                                 <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                                <p className="text-sm text-red-800">{error}</p>
+                                <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
                             </div>
                         )}
 
@@ -200,7 +200,7 @@ export default function Signup() {
                     </form>
 
                     <div className="mt-6 text-center">
-                        <p className="text-slate-600">
+                        <p className="text-slate-600 dark:text-slate-400">
                             Already have an account?{' '}
                             <Link to="/login" className="text-primary-600 hover:text-primary-700 font-semibold hover:underline">
                                 Sign in

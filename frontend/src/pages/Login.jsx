@@ -37,7 +37,7 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="min-h-screen flex items-center justify-center p-4 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-800 dark:to-slate-950">
             <div className="w-full max-w-md">
                 {/* Header */}
                 <div className="text-center mb-8">
@@ -47,16 +47,16 @@ export default function Login() {
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent mb-2">
                         Welcome Back
                     </h1>
-                    <p className="text-slate-600">Sign in to manage your savings circles</p>
+                    <p className="text-slate-600 dark:text-slate-400">Sign in to manage your savings circles</p>
                 </div>
 
                 {/* Login Form */}
                 <div className="card">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (
-                            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-start gap-3">
+                            <div className="bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-700 rounded-lg p-4 flex items-start gap-3">
                                 <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                                <p className="text-sm text-red-800">{error}</p>
+                                <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
                             </div>
                         )}
 
@@ -111,7 +111,7 @@ export default function Login() {
                     </form>
 
                     <div className="mt-6 text-center">
-                        <p className="text-slate-600">
+                        <p className="text-slate-600 dark:text-slate-400">
                             Don't have an account?{' '}
                             <Link to="/signup" className="text-primary-600 hover:text-primary-700 font-semibold hover:underline">
                                 Sign up
@@ -122,15 +122,15 @@ export default function Login() {
 
                 {/* Features */}
                 <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-                    <div className="p-3 rounded-lg bg-white/60 backdrop-blur-sm">
+                    <div className="p-3 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
                         <p className="text-2xl font-bold text-primary-600"></p>
                         <p className="text-xs text-slate-600 mt-1"></p>
                     </div>
-                    <div className="p-3 rounded-lg bg-white/60 backdrop-blur-sm">
+                    <div className="p-3 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
                         <p className="text-2xl font-bold text-primary-600"></p>
                         <p className="text-xs text-slate-600 mt-1"></p>
                     </div>
-                    <div className="p-3 rounded-lg bg-white/60 backdrop-blur-sm">
+                    <div className="p-3 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
                         <p className="text-2xl font-bold text-primary-600">📊</p>
                         <p className="text-xs text-slate-600 mt-1"></p>
                     </div>

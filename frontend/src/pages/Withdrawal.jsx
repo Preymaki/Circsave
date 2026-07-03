@@ -156,7 +156,7 @@ export default function Withdrawal() {
 
     if (loadingWallet) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-950 flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600 mx-auto mb-4" />
                     <p className="text-slate-600 font-medium">Loading your wallet...</p>
@@ -170,7 +170,7 @@ export default function Withdrawal() {
     // SUCCESS SCREEN
     if (step === 'success') {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-950 flex items-center justify-center p-4">
                 <div className="card max-w-md w-full text-center py-12 px-8 shadow-2xl">
                     <div className="flex items-center justify-center mb-6">
                         <div
@@ -184,7 +184,7 @@ export default function Withdrawal() {
                         </div>
                     </div>
 
-                    <h1 className="text-3xl font-bold text-slate-900 mb-3">
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
                         Withdrawal Successful!
                     </h1>
 
@@ -199,23 +199,23 @@ export default function Withdrawal() {
                         (This is a simulated transaction.)
                     </p>
 
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-8 text-left space-y-2">
+                    <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 mb-8 text-left space-y-2">
                         <div className="flex justify-between text-sm">
-                            <span className="text-slate-500">To</span>
-                            <span className="font-semibold text-slate-800">{bank}</span>
+                            <span className="text-slate-500 dark:text-slate-400">To</span>
+                            <span className="font-semibold text-slate-800 dark:text-white">{bank}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-slate-500">Account</span>
-                            <span className="font-semibold text-slate-800 font-mono">{accountNumber}</span>
+                            <span className="text-slate-500 dark:text-slate-400">Account</span>
+                            <span className="font-semibold text-slate-800 dark:text-white font-mono">{accountNumber}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-slate-500">Name</span>
-                            <span className="font-semibold text-slate-800">{accountName}</span>
+                            <span className="text-slate-500 dark:text-slate-400">Name</span>
+                            <span className="font-semibold text-slate-800 dark:text-white">{accountName}</span>
                         </div>
                         {narration && (
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Narration</span>
-                                <span className="font-semibold text-slate-800">{narration}</span>
+                                <span className="text-slate-500 dark:text-slate-400">Narration</span>
+                                <span className="font-semibold text-slate-800 dark:text-white">{narration}</span>
                             </div>
                         )}
                     </div>
@@ -242,7 +242,7 @@ export default function Withdrawal() {
     // CONFIRMATION SCREEN
     if (step === 'confirm') {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4 py-8">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-950 p-4 py-8">
                 <div className="max-w-lg mx-auto">
                     <div className="mb-8">
                         <button
@@ -258,7 +258,7 @@ export default function Withdrawal() {
                             </div>
                             Confirm Withdrawal
                         </h1>
-                        <p className="text-slate-500">Please review the details before confirming</p>
+                        <p className="text-slate-500 dark:text-slate-400">Please review the details before confirming</p>
                     </div>
 
                     {error && (
@@ -334,7 +334,7 @@ export default function Withdrawal() {
 
     // FORM SCREEN
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4 py-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-950 p-4 py-8">
             <div className="max-w-lg mx-auto">
                 <div className="mb-8">
                     <Link
@@ -347,13 +347,13 @@ export default function Withdrawal() {
 
                     <div className="flex items-start justify-between flex-wrap gap-4">
                         <div>
-                            <h1 className="text-4xl font-bold text-slate-900 flex items-center gap-3 mb-2">
+                            <h1 className="text-4xl font-bold text-slate-900 dark:text-white flex items-center gap-3 mb-2">
                                 <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
                                     <ArrowUpRight className="w-6 h-6 text-white" />
                                 </div>
                                 Withdraw Funds
                             </h1>
-                            <p className="text-slate-500">Send money to your bank or fintech account</p>
+                            <p className="text-slate-500 dark:text-slate-400">Send money to your bank or fintech account</p>
                         </div>
                         <div className="inline-flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
                             <Shield className="w-4 h-4 text-amber-600" />

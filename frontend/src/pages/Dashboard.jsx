@@ -113,7 +113,7 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-800 dark:to-slate-950">
             <Navbar />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -147,8 +147,8 @@ export default function Dashboard() {
                     <div className="card">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-600 mb-1">Total Saved</p>
-                                <p className="text-3xl font-bold text-slate-800">{formatNaira(totalSaved)}</p>
+                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Total Saved</p>
+                                <p className="text-3xl font-bold text-slate-800 dark:text-white">{formatNaira(totalSaved)}</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                                 <TrendingUp className="w-6 h-6 text-green-600" />
@@ -159,8 +159,8 @@ export default function Dashboard() {
                     <div className="card">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-600 mb-1">Active Groups</p>
-                                <p className="text-3xl font-bold text-slate-800">{groups.activeGroups.length}</p>
+                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Active Groups</p>
+                                <p className="text-3xl font-bold text-slate-800 dark:text-white">{groups.activeGroups.length}</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                                 <Users className="w-6 h-6 text-blue-600" />
@@ -171,8 +171,8 @@ export default function Dashboard() {
                     <div className="card">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-600 mb-1">Next Contribution</p>
-                                <p className="text-lg font-semibold text-slate-800">{formatNextContribution()}</p>
+                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Next Contribution</p>
+                                <p className="text-lg font-semibold text-slate-800 dark:text-white">{formatNextContribution()}</p>
                             </div>
                             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                                 <Clock className="w-6 h-6 text-purple-600" />
@@ -184,7 +184,7 @@ export default function Dashboard() {
                 {/* Wallet Summary Card */}
                 <Link to="/wallet" className="card mb-6 hover:shadow-xl transition-all duration-300">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
                             <Wallet className="w-6 h-6 text-primary-600" />
                             My Wallet
                         </h2>
@@ -193,21 +193,21 @@ export default function Dashboard() {
 
                     {wallet ? (
                         <div className="grid md:grid-cols-3 gap-4">
-                            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4">
+                            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 rounded-lg p-4">
                                 <p className="text-sm text-emerald-700 mb-1">Available Balance</p>
                                 <p className="text-2xl font-bold text-emerald-800">
                                     {formatNaira(wallet.availableBalance)}
                                 </p>
                             </div>
 
-                            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4">
+                            <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 rounded-lg p-4">
                                 <p className="text-sm text-orange-700 mb-1">Locked Balance</p>
                                 <p className="text-2xl font-bold text-orange-800">
                                     {formatNaira(wallet.lockedBalance)}
                                 </p>
                             </div>
 
-                            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
+                            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-lg p-4">
                                 <p className="text-sm text-blue-700 mb-1">Total Funded</p>
                                 <p className="text-2xl font-bold text-blue-800">
                                     {formatNaira(wallet.totalFunded)}
@@ -227,7 +227,7 @@ export default function Dashboard() {
 
                 <div className="card mb-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-2xl font-bold text-slate-800">Active Groups</h2>
+                        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Active Groups</h2>
                         {groups.closedGroups.length > 0 && (
                             <Link to="/history" className="text-sm text-primary-600 hover:text-primary-700 font-semibold">
                                 View History →
@@ -253,15 +253,15 @@ export default function Dashboard() {
                                 <Link
                                     key={group.id}
                                     to={`/group/${group.id}`}
-                                    className={`p-6 bg-gradient-to-br from-slate-50 to-white rounded-xl border-2 transition-all ${group.cycleStatus === 'delayed'
+                                    className={`p-6 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-700 rounded-xl border-2 transition-all ${group.cycleStatus === 'delayed'
                                         ? 'border-red-300 hover:border-red-400 hover:shadow-lg'
-                                        : 'border-slate-200 hover:border-primary-300 hover:shadow-lg'
+                                        : 'border-slate-200 dark:border-slate-600 hover:border-primary-300 hover:shadow-lg'
                                         }`}
                                 >
                                     <div className="flex items-start justify-between mb-4">
                                         <div>
                                             <div className="flex items-start justify-between mb-1">
-                                                <h3 className="text-xl font-bold text-slate-800">{group.name}</h3>
+                                                <h3 className="text-xl font-bold text-slate-800 dark:text-white">{group.name}</h3>
                                                 {group.cycleStatus === 'delayed' && (
                                                     <span className="flex items-center gap-1 text-xs font-semibold text-red-700 bg-red-100 px-2 py-1 rounded-full">
                                                         <AlertOctagon className="w-3 h-3" /> Delayed
@@ -269,7 +269,7 @@ export default function Dashboard() {
                                                 )}
                                             </div>
                                             {group.description && (
-                                                <p className="text-sm text-slate-600 line-clamp-2">{group.description}</p>
+                                                <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">{group.description}</p>
                                             )}
                                         </div>
                                         <ArrowRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
@@ -287,8 +287,8 @@ export default function Dashboard() {
                                     </div>
 
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="text-slate-600 capitalize">{group.contributionFrequency}</span>
-                                        <span className="text-slate-600">Cycle {group.currentCycle}/{group.totalCycles}</span>
+                                        <span className="text-slate-600 dark:text-slate-400 capitalize">{group.contributionFrequency}</span>
+                                        <span className="text-slate-600 dark:text-slate-400">Cycle {group.currentCycle}/{group.totalCycles}</span>
                                     </div>
                                 </Link>
                             ))}
